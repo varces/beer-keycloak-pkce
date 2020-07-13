@@ -51,6 +51,8 @@ As `Keycloak` supports [`PKCE`](https://oauth.net/2/pkce/) (`Proof Key for Code 
 
 ## Start environment
 
+- Add `keycloak       127.0.0.1` in /etc/hosts
+
 - In a terminal and inside root folder run
   ```
   docker-compose up -d
