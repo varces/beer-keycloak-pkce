@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: beer-api
+  data:
+    mongodb:
+      uri: mongodb://${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/beerdb
+
+management:
+  endpoints:
+    web:
+      exposure.include: "beans,env,health,info,metrics,mappings"
+  endpoint:
+    health:
+      show-details: always
+
+keycloak:
+  auth-server-url: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT:8080}/auth
+  realm: beer-services
+  resource: beer-app
+  ssl-required: external
+  principal-attribute: preferred_username
+  use-resource-role-mappings: true

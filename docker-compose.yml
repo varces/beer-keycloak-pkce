@@ -1,0 +1,79 @@
+version: "3.7"
+
+services:
+
+  mongodb:
+    image: mongo:4.2.7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/moviesdb --quiet
+      start_period: 10s
+
+  mysql:
+    image: mysql:5.7.30
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=keycloak
+      - MYSQL_USER=keycloak
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
+      start_period: 10s
+
+  keycloak:
+    image: jboss/keycloak:10.0.2
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=mysql
+      - DB_ADDR=mysql
+      - DB_USER=keycloak
+      - DB_PASSWORD=password
+      - JDBC_PARAMS=useSSL=false
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    healthcheck:
+      test: "curl -f http://localhost:8080/auth || exit 1"
+      start_period: 20s
+
+  # App backend service
+  beer-api:
+    # Configuration for building the docker image for the backend service
+    build:
+      context: beers-api # Use an image built from the specified dockerfile
+      dockerfile: Dockerfile
+    environment:
+      - MONGODB_HOST=mongodb
+      - KEYCLOAK_HOST=keycloak
+    ports:
+      - "9080:8080"
+    restart: always
+    depends_on: 
+      - mongodb 
+      - keycloak
+    links:
+      - mongodb
+      - keycloak
+
+  # Frontend Service 
+  beer-ui:
+    build:
+      context: beers-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    restart: always
+    depends_on:
+      - beer-api
+      - keycloak
+    links:
+      - keycloak
+
