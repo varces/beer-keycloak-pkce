@@ -18,7 +18,7 @@ function App() {
     realm: "beer-services",
     clientId: "beer-app"
   })
-  const initConfig = { pkceMethod: 'S256' }
+   const initConfig = { pkceMethod: 'S256', checkLoginIframe: false }
 
   const handleOnEvent = async (event, error) => {
     if (event === 'onAuthSuccess') {
